@@ -39,7 +39,14 @@ def create_dataframes(stock_data):
         (item["id"], item["displayName"], item["value"], item["indication"]) for item in indicators_data
     ], columns=["ID", "Display Name", "Value", "Indication"])
 
-    return pivot_levels_df, sma_df, ema_df, crossover_df, indicators_df
+    # Calculate Stoploss and Target based on Pivot Levels
+    stoploss_target_df = pd.DataFrame({
+        "Key": pivot_levels_df["Key"],
+        "Stoploss": pivot_levels_df["S1"],
+        "Target": pivot_levels_df["R1"]
+    })
+
+    return pivot_levels_df, sma_df, ema_df, crossover_df, indicators_df, stoploss_target_df
 
 # Display search input box
 search_symbol = st.text_input("Enter stock symbol:")
@@ -49,7 +56,7 @@ if search_button:
     # Load and display data for the entered symbol
     try:
         stock_data = load_stock_data(search_symbol)
-        pivot_levels_df, sma_df, ema_df, crossover_df, indicators_df = create_dataframes(stock_data)
+        pivot_levels_df, sma_df, ema_df, crossover_df, indicators_df, stoploss_target_df = create_dataframes(stock_data)
 
         # Display information using Streamlit
         st.title(f"Stock Information - {search_symbol}")
@@ -68,6 +75,9 @@ if search_button:
 
         st.subheader("Technical Indicators")
         st.table(indicators_df)
+
+        st.subheader("Stoploss and Target based on Pivot Levels")
+        st.table(stoploss_target_df)
 
     except FileNotFoundError:
         st.error("Data not found for the entered symbol. Please enter a valid stock symbol.")
