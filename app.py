@@ -1,3 +1,13 @@
+import streamlit as st
+import pandas as pd
+import json
+
+# Function to load JSON data for a specific symbol
+def load_stock_data(symbol):
+    file_path = f"data/{symbol}_data.json"
+    with open(file_path, "r") as file:
+        return json.load(file)
+
 # Function to create DataFrames from JSON data
 def create_dataframes(stock_data):
     symbol_info = stock_data["data"]
