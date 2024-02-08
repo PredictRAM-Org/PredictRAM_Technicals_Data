@@ -1,13 +1,3 @@
-import streamlit as st
-import pandas as pd
-import json
-
-# Function to load JSON data for a specific symbol
-def load_stock_data(symbol):
-    file_path = f"data/{symbol}_data.json"
-    with open(file_path, "r") as file:
-        return json.load(file)
-
 # Function to create DataFrames from JSON data
 def create_dataframes(stock_data):
     symbol_info = stock_data["data"]
@@ -24,6 +14,9 @@ def create_dataframes(stock_data):
           level["pivotLevel"]["s2"], level["pivotLevel"]["s3"]) for level in pivot_levels],
         columns=["Key", "Pivot Point", "R1", "R2", "R3", "S1", "S2", "S3"]
     )
+
+    # Ensure numeric values for mean calculation
+    pivot_levels_df[["Pivot Point", "R1", "R2", "R3", "S1", "S2", "S3"]] = pivot_levels_df[["Pivot Point", "R1", "R2", "R3", "S1", "S2", "S3"]].apply(pd.to_numeric, errors='coerce')
 
     # Calculate averages for Classic, Fibonacci, and Camarilla
     classic_avg = pivot_levels_df[["Pivot Point", "R1", "R2", "R3", "S1", "S2", "S3"]].mean(axis=1)
