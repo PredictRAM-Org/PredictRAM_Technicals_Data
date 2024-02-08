@@ -25,6 +25,18 @@ def create_dataframes(stock_data):
         columns=["Key", "Pivot Point", "R1", "R2", "R3", "S1", "S2", "S3"]
     )
 
+    # Calculate averages for Classic, Fibonacci, and Camarilla
+    classic_avg = pivot_levels_df[["Pivot Point", "R1", "R2", "R3", "S1", "S2", "S3"]].mean(axis=1)
+    fibonacci_avg = pivot_levels_df[["R1", "R2", "R3", "S1", "S2", "S3"]].apply(lambda x: x / 2).mean(axis=1)
+    camarilla_avg = pivot_levels_df[["Pivot Point", "R1", "R2", "R3", "S1", "S2", "S3"]].apply(lambda x: x / 4).mean(axis=1)
+
+    averages_df = pd.DataFrame({
+        "Key": pivot_levels_df["Key"],
+        "Classic Avg": classic_avg,
+        "Fibonacci Avg": fibonacci_avg,
+        "Camarilla Avg": camarilla_avg
+    })
+
     sma_df = pd.DataFrame([(item["key"], item["value"], item["indication"]) for item in sma_data],
                           columns=["Key", "Value", "Indication"])
 
@@ -46,7 +58,7 @@ def create_dataframes(stock_data):
         "Target": pivot_levels_df["R1"]
     })
 
-    return pivot_levels_df, sma_df, ema_df, crossover_df, indicators_df, stoploss_target_df
+    return pivot_levels_df, averages_df, sma_df, ema_df, crossover_df, indicators_df, stoploss_target_df
 
 # Display search input box
 search_symbol = st.text_input("Enter stock symbol:")
@@ -56,13 +68,16 @@ if search_button:
     # Load and display data for the entered symbol
     try:
         stock_data = load_stock_data(search_symbol)
-        pivot_levels_df, sma_df, ema_df, crossover_df, indicators_df, stoploss_target_df = create_dataframes(stock_data)
+        pivot_levels_df, averages_df, sma_df, ema_df, crossover_df, indicators_df, stoploss_target_df = create_dataframes(stock_data)
 
         # Display information using Streamlit
         st.title(f"Stock Information - {search_symbol}")
         
         st.subheader("Pivot Levels")
         st.table(pivot_levels_df)
+
+        st.subheader("Averages of Pivot Levels")
+        st.table(averages_df)
 
         st.subheader("Simple Moving Averages (SMA)")
         st.table(sma_df)
